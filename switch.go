@@ -120,7 +120,8 @@ func (s *Switch) Draw() {
 }
 
 func (s *Switch) isCollided(p0 Position) (bool, bool) {
-	p := p0.Subtract(s.position)
+	p1 := p0.Subtract(s.position)
+	p := s.UnwindPosition(p1)
 	if p.X < 0 || p.Y < 0 {
 		return false, false
 	}
