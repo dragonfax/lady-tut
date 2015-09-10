@@ -13,7 +13,7 @@ func render() {
 	level.drawOutside()
 	level.drawWalls()
 	level.drawSwitches()
-	// level.drawMonsters()
+	level.drawMonsters()
 	hero.Draw()
 	termbox.Flush()
 }

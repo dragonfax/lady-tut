@@ -7,22 +7,18 @@ type Hero struct {
 	health   uint
 }
 
-type Monster struct {
-	position Position
-}
-
 var hero = Hero{Position{0, 0}, 1}
 
 func (h Hero) Draw() {
 	termbox.SetCell(h.position.X, h.position.Y, 'H', foregroundColor, backgroundColor)
 }
 
-func collides(np Position, op Position) bool {
+func (h Hero) collides(np Position, op Position) bool {
 	if level.isWallAt(np) {
 		return true
 	}
 
-	if level.isSwitchAt(np, op) {
+	if level.isSwitchAt(np, op, true) {
 		return true
 	}
 
@@ -37,7 +33,7 @@ func (h *Hero) moveLeft() {
 		np.X = 0
 	}
 
-	if collides(np, h.position) {
+	if h.collides(np, h.position) {
 		return
 	}
 
@@ -49,7 +45,7 @@ func (h *Hero) moveRight() {
 
 	np.X += 1
 
-	if collides(np, h.position) {
+	if h.collides(np, h.position) {
 		return
 	}
 
@@ -64,7 +60,7 @@ func (h *Hero) moveUp() {
 		np.Y = 0
 	}
 
-	if collides(np, h.position) {
+	if h.collides(np, h.position) {
 		return
 	}
 
@@ -76,7 +72,7 @@ func (h *Hero) moveDown() {
 
 	np.Y += 1
 
-	if collides(np, h.position) {
+	if h.collides(np, h.position) {
 		return
 	}
 

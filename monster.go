@@ -1,0 +1,120 @@
+package main
+
+import (
+	"math/rand"
+	"time"
+
+	"github.com/nsf/termbox-go"
+)
+
+type Monster struct {
+	position Position
+}
+
+func NewMonster() *Monster {
+	m := &Monster{Position{4, 4}}
+	go m.ThinkLoop()
+	return m
+}
+
+func (m Monster) Draw() {
+	termbox.SetCell(m.position.X, m.position.Y, 'M', foregroundColor, backgroundColor)
+}
+
+func (m Monster) collides(np Position) bool {
+	if level.isWallAt(np) {
+		return true
+	}
+
+	if level.isSwitchAt(np, Position{}, false) {
+		return true
+	}
+
+	return false
+}
+
+func (m *Monster) moveLeft() {
+	np := m.position
+
+	np.X -= 1
+	if np.X < 0 {
+		np.X = 0
+	}
+
+	if m.collides(np) {
+		return
+	}
+
+	m.position = np
+}
+
+func (m *Monster) moveUp() {
+	np := m.position
+
+	np.Y -= 1
+	if np.Y < 0 {
+		np.Y = 0
+	}
+
+	if m.collides(np) {
+		return
+	}
+
+	m.position = np
+}
+
+func (m *Monster) moveRight() {
+	np := m.position
+
+	np.X += 1
+
+	if m.collides(np) {
+		return
+	}
+
+	m.position = np
+}
+
+func (m *Monster) moveDown() {
+	np := m.position
+
+	np.Y += 1
+
+	if m.collides(np) {
+		return
+	}
+
+	m.position = np
+}
+
+func (m *Monster) Think() {
+	// if I can see the Hero, move toward the hero
+	// otherwise move randomly
+
+	if hero.position.X == m.position.X {
+		if hero.position.Y > m.position.Y {
+			m.moveDown()
+		} else {
+			m.moveUp()
+		}
+	} else if hero.position.Y == m.position.Y {
+		if hero.position.X > m.position.X {
+			m.moveRight()
+		} else {
+			m.moveLeft()
+		}
+	} else {
+		[]func(){m.moveUp, m.moveDown, m.moveLeft, m.moveRight}[rand.Uint32()%4]()
+	}
+}
+
+// a goroutine to think and move at a specific pace.
+func (m *Monster) ThinkLoop() {
+	ticker := time.NewTicker(time.Millisecond * 500)
+	for {
+		select {
+		case <-ticker.C:
+			m.Think()
+		}
+	}
+}

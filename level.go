@@ -9,7 +9,7 @@ type Level struct {
 	height   uint
 	walls    Walls
 	switches []*Switch
-	monsters []Monster
+	monsters []*Monster
 }
 
 type Walls Grid
@@ -22,7 +22,7 @@ var level = &Level{
 		{false, false, false, false, true},
 	},
 	[]*Switch{NewSwitch()},
-	[]Monster{Monster{Position{5, 5}}},
+	[]*Monster{},
 }
 
 func (l *Level) drawOutside() {
@@ -58,10 +58,10 @@ func (l *Level) isWallAt(p Position) bool {
 	return false
 }
 
-func (l *Level) isSwitchAt(p Position, op Position) bool {
+func (l *Level) isSwitchAt(p Position, op Position, flip bool) bool {
 	for _, s := range l.switches {
 		if a, b := s.isCollided(p); a {
-			if b {
+			if flip && b {
 				s.Swivel(op)
 			}
 			return true
@@ -73,6 +73,12 @@ func (l *Level) isSwitchAt(p Position, op Position) bool {
 func (l *Level) drawSwitches() {
 	for _, s := range l.switches {
 		s.Draw()
+	}
+}
+
+func (l *Level) drawMonsters() {
+	for _, m := range l.monsters {
+		m.Draw()
 	}
 }
 

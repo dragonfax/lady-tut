@@ -18,6 +18,8 @@ func main() {
 		}
 	}()
 
+	level.monsters = append(level.monsters, NewMonster())
+
 	for {
 		select {
 		case ev := <-eventQueue:
