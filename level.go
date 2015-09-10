@@ -58,6 +58,18 @@ func (l *Level) isWallAt(p Position) bool {
 	return false
 }
 
+func (l *Level) isSwitchAt(p Position, op Position) bool {
+	for _, s := range l.switches {
+		if a, b := s.isCollided(p); a {
+			if b {
+				s.Swivel(op)
+			}
+			return true
+		}
+	}
+	return false
+}
+
 func (l *Level) drawSwitches() {
 	for _, s := range l.switches {
 		s.Draw()

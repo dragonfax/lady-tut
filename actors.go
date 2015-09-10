@@ -17,6 +17,18 @@ func (h Hero) Draw() {
 	termbox.SetCell(h.position.X, h.position.Y, 'H', foregroundColor, backgroundColor)
 }
 
+func collides(np Position, op Position) bool {
+	if level.isWallAt(np) {
+		return true
+	}
+
+	if level.isSwitchAt(np, op) {
+		return true
+	}
+
+	return false
+}
+
 func (h *Hero) moveLeft() {
 	np := h.position
 
@@ -25,7 +37,7 @@ func (h *Hero) moveLeft() {
 		np.X = 0
 	}
 
-	if level.isWallAt(np) {
+	if collides(np, h.position) {
 		return
 	}
 
@@ -37,7 +49,7 @@ func (h *Hero) moveRight() {
 
 	np.X += 1
 
-	if level.isWallAt(np) {
+	if collides(np, h.position) {
 		return
 	}
 
@@ -52,7 +64,7 @@ func (h *Hero) moveUp() {
 		np.Y = 0
 	}
 
-	if level.isWallAt(np) {
+	if collides(np, h.position) {
 		return
 	}
 
@@ -64,7 +76,7 @@ func (h *Hero) moveDown() {
 
 	np.Y += 1
 
-	if level.isWallAt(np) {
+	if collides(np, h.position) {
 		return
 	}
 

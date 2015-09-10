@@ -2,40 +2,43 @@ package main
 
 import "github.com/nsf/termbox-go"
 
-type Direction uint
+type Direction uint8
 
 const (
-	UP    Direction = iota
-	RIGHT           = iota
-	DOWN            = iota
-	LEFT            = iota
+	UP            Direction = iota
+	RIGHT                   = iota
+	DOWN                    = iota
+	LEFT                    = iota
+	MAX_DIRECTION           = iota
 )
 
-var directions = []Direction{UP, RIGHT, DOWN, LEFT}
-
-type Rotation uint
+type Rotation int8
 
 const (
-	CLOCKWISE         Rotation = iota
-	COUNTER_CLOCKWISE          = iota
+	CLOCKWISE         Rotation = 1
+	COUNTER_CLOCKWISE          = -1
 )
 
 // a swinging door or set of doors around the same pivot
 // center
 type Switch struct {
-	grid     Grid
-	pivot    Position
-	position Position // position within the level
-	rotation Direction
+	grid      Grid
+	pivot     Position
+	position  Position // position within the level
+	direction Direction
 }
 
 func NewSwitch() *Switch {
-	return &Switch{Grid{
-		{false, false, true},
-		{false, false, true},
-		{false, false, false, true, true},
-	},
-		Position{2, 2}, Position{5, 5}, UP}
+	return &Switch{
+		Grid{
+			{false, false, true},
+			{false, false, true},
+			{false, false, false, true, true},
+		},
+		Position{2, 2},
+		Position{5, 5},
+		UP,
+	}
 }
 
 func (s *Switch) Draw() {
@@ -65,10 +68,32 @@ func (s *Switch) Draw() {
 	}
 }
 
-/*
-func (s *Switch) Collides(p Position) bool {
+func (s *Switch) isCollided(p0 Position) (bool, bool) {
+	p := p0.Subtract(s.position)
+	if p.X < 0 || p.Y < 0 {
+		return false, false
+	}
+	if p == s.pivot {
+		return true, false
+	}
+	if len(s.grid) > p.Y && len(s.grid[p.Y]) > p.X && s.grid[p.Y][p.X] {
+		return true, true
+	}
+	return false, false
 }
 
-func (s *Switch) CollideSwivel(oldp Position, newp Position) Rotation {
+func (s *Switch) Swivel(op Position) {
+	// TODO
+	s.Rotate(CLOCKWISE)
 }
-*/
+
+func (s *Switch) Rotate(c Rotation) {
+	nd := uint8(s.direction) + uint8(c)
+	if nd >= MAX_DIRECTION {
+		nd = 0
+	}
+	if nd < 0 {
+		nd = MAX_DIRECTION - 1
+	}
+	s.direction = Direction(nd)
+}

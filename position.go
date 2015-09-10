@@ -8,3 +8,7 @@ type Position struct {
 func (p Position) Add(q Position) Position {
 	return Position{p.X + q.X, p.Y + q.Y}
 }
+
+func (p Position) Subtract(q Position) Position {
+	return Position{p.X - q.X, p.Y - q.Y}
+}
