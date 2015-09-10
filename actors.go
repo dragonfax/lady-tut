@@ -23,23 +23,55 @@ func (h Hero) Draw() {
 }
 
 func (h *Hero) moveLeft() {
-	h.position.X -= 1
-	if h.position.X < 0 {
-		h.position.X = 0
+	np := h.position
+
+	np.X -= 1
+	if np.X < 0 {
+		np.X = 0
 	}
+
+	if level.isWallAt(np) {
+		return
+	}
+
+	h.position = np
 }
 
 func (h *Hero) moveRight() {
-	h.position.X += 1
+	np := h.position
+
+	np.X += 1
+
+	if level.isWallAt(np) {
+		return
+	}
+
+	h.position = np
 }
 
 func (h *Hero) moveUp() {
-	h.position.Y -= 1
-	if h.position.Y < 0 {
-		h.position.Y = 0
+	np := h.position
+
+	np.Y -= 1
+	if np.Y < 0 {
+		np.Y = 0
 	}
+
+	if level.isWallAt(np) {
+		return
+	}
+
+	h.position = np
 }
 
 func (h *Hero) moveDown() {
-	h.position.Y += 1
+	np := h.position
+
+	np.Y += 1
+
+	if level.isWallAt(np) {
+		return
+	}
+
+	h.position = np
 }

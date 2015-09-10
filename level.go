@@ -48,4 +48,14 @@ func (l *Level) drawWalls() {
 	}
 }
 
+func (l *Level) isWallAt(p Position) bool {
+	if p.X < 0 || uint(p.X) >= l.width || p.Y < 0 || uint(p.Y) >= l.height {
+		return true
+	}
+	if len(l.walls) > p.Y && len(l.walls[p.Y]) > p.X && l.walls[p.Y][p.X] {
+		return true
+	}
+	return false
+}
+
 // level.drawMonsters()
