@@ -5,10 +5,10 @@ import "github.com/nsf/termbox-go"
 type Grid [][]bool
 
 type Level struct {
-	width  uint
-	height uint
-	walls  Walls
-	// switches []Switch
+	width    uint
+	height   uint
+	walls    Walls
+	switches []*Switch
 	monsters []Monster
 }
 
@@ -21,7 +21,7 @@ var level = &Level{
 		{false, false, false, false, false, true},
 		{false, false, false, false, true},
 	},
-	// []Switch{},
+	[]*Switch{NewSwitch()},
 	[]Monster{Monster{Position{5, 5}}},
 }
 
@@ -56,6 +56,12 @@ func (l *Level) isWallAt(p Position) bool {
 		return true
 	}
 	return false
+}
+
+func (l *Level) drawSwitches() {
+	for _, s := range l.switches {
+		s.Draw()
+	}
 }
 
 // level.drawMonsters()

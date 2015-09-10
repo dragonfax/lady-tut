@@ -2,11 +2,6 @@ package main
 
 import "github.com/nsf/termbox-go"
 
-type Position struct {
-	X int
-	Y int
-}
-
 type Hero struct {
 	position Position
 	health   uint
