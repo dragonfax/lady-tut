@@ -4,6 +4,8 @@ import "github.com/nsf/termbox-go"
 
 type Direction uint8
 
+// if the default door is facing up
+// what direction will it face after its been rotated?
 const (
 	UP            Direction = iota
 	RIGHT                   = iota
@@ -41,6 +43,54 @@ func NewSwitch() *Switch {
 	}
 }
 
+// given a rotated position, return the unrotated/original position
+func (s *Switch) UnwindPosition(p Position) Position {
+	o := p.Subtract(s.pivot)
+
+	var no Position
+
+	switch s.direction {
+	case UP:
+		return p
+	case RIGHT:
+		no = Position{o.Y, -o.X}
+	case DOWN:
+		no = Position{-o.X, -o.Y}
+	case LEFT:
+		no = Position{-o.Y, o.X}
+	default:
+		panic("unknown case")
+	}
+
+	return no.Add(s.pivot)
+}
+
+// given a position in the switch grid, return the rotated position.
+func (s *Switch) WindPosition(p Position) Position {
+	// 1. orient to pivot point
+	// 2. flip axis and sign
+	// 3. reorient to pivot again
+
+	o := p.Subtract(s.pivot)
+
+	var no Position
+
+	switch s.direction {
+	case UP:
+		return p
+	case RIGHT:
+		no = Position{-o.Y, o.X}
+	case DOWN:
+		no = Position{-o.X, -o.Y}
+	case LEFT:
+		no = Position{o.Y, -o.X}
+	default:
+		panic("unknown case")
+	}
+
+	return no.Add(s.pivot)
+}
+
 func (s *Switch) Draw() {
 
 	plp := s.position.Add(s.pivot)
@@ -49,19 +99,20 @@ func (s *Switch) Draw() {
 	for y := 0; y < len(s.grid); y++ {
 		for x := 0; x < len(s.grid[y]); x++ {
 			if s.grid[y][x] {
+				rp := s.WindPosition(Position{x, y})
 				var r rune
-				if x > s.pivot.X {
+				if rp.X > s.pivot.X {
 					r = '-'
-				} else if x < s.pivot.X {
+				} else if rp.X < s.pivot.X {
 					r = '-'
-				} else if y > s.pivot.Y {
+				} else if rp.Y > s.pivot.Y {
 					r = '|'
-				} else if y < s.pivot.Y {
+				} else if rp.Y < s.pivot.Y {
 					r = '|'
 				} else {
 					panic("bad door position")
 				}
-				gridp := s.position.Add(Position{x, y})
+				gridp := s.position.Add(rp)
 				termbox.SetCell(gridp.X, gridp.Y, r, foregroundColor, backgroundColor)
 			}
 		}
