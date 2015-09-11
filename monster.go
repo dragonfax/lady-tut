@@ -11,8 +11,8 @@ type Monster struct {
 	position Position
 }
 
-func NewMonster() *Monster {
-	m := &Monster{Position{4, 4}}
+func NewMonster(x, y int) *Monster {
+	m := &Monster{Position{x, y}}
 	go m.ThinkLoop()
 	return m
 }

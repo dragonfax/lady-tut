@@ -18,7 +18,9 @@ func main() {
 		}
 	}()
 
-	level.monsters = append(level.monsters, NewMonster())
+	// level.monsters = append(level.monsters, NewMonster())
+
+	level = load("level1.lvl")
 
 	for {
 		select {
