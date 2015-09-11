@@ -20,19 +20,6 @@ type Level struct {
 	treasure []*Position
 }
 
-/*
-var level = &Level{
-	10,
-	10,
-	Walls{
-		{false, false, false, false, false, true},
-		{false, false, false, false, true},
-	},
-	[]*Switch{NewSwitch()},
-	[]*Monster{},
-}
-*/
-
 var level *Level
 
 func (l *Level) drawOutside() {
@@ -93,26 +80,38 @@ func (l *Level) drawMonsters() {
 }
 
 func load(filename string) *Level {
-	l := &Level{}
+	l := &Level{walls: make([][]bool, 0, 50)}
 
 	file, err := os.Open(filename)
 	if err != nil {
 		panic("failed to open level file")
 	}
+	defer file.Close()
 
-	reader := bufio.NewReader(file)
+	scanner := bufio.NewScanner(file)
+	lines := make([]string, 0, 50)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
 
-	var lines [][]byte = make([][]byte, 0, 50)
-	for line0, _, err := reader.ReadLine(); err != nil; line0, _, err = reader.ReadLine() {
-		line := make([]byte, len(line0))
-		copy(line, line0)
-		lines = append(lines, line)
+	if err := scanner.Err(); err != nil {
+		panic("scanner error: " + err.Error())
+	}
+
+	if len(lines) == 0 {
+		panic("no lines read from file")
 	}
 
 	// scan for individual sells
 	for y, line := range lines {
 		for x, b := range line {
 			if b == 'W' {
+				if y >= len(l.walls) {
+					l.walls = append(l.walls, make([]bool, 0, 50))
+				}
+				for x >= len(l.walls[y]) {
+					l.walls[y] = append(l.walls[y], false)
+				}
 				l.walls[y][x] = true
 			}
 
