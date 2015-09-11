@@ -1,7 +1,7 @@
-Simple terminal game.
+Simple terminal maze game inspired by the classic 8-Bit game Lady Tut.
 
 * You are the Hero (H)
-* Move the the maze
+* Move through the maze
 * Collect treasure (T)
 * Avoid monsters (M)
 * Rotate doors (O--)
