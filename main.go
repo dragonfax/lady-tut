@@ -19,6 +19,7 @@ func main() {
 	}()
 
 	level = load("level1.lvl")
+	hero.position = level.entrance
 
 	for {
 		select {
