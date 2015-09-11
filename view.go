@@ -13,6 +13,7 @@ func render() {
 	level.drawOutside()
 	level.drawWalls()
 	level.drawTreasure()
+	level.drawExit()
 	level.drawSwitches()
 	level.drawMonsters()
 	hero.Draw()
