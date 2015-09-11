@@ -143,6 +143,43 @@ func (s *Switch) canRotate(p Position) (bool, Rotation) {
 }
 
 func (s *Switch) rotate(r Rotation) {
+
+	if s.isMonsterIn(UPRIGHT_QUAD) {
+		if r == CLOCKWISE && s.hasPanel(NORTH) {
+			return
+		}
+		if r == COUNTER_CLOCKWISE && s.hasPanel(EAST) {
+			return
+		}
+	}
+
+	if s.isMonsterIn(UPLEFT_QUAD) {
+		if r == CLOCKWISE && s.hasPanel(WEST) {
+			return
+		}
+		if r == COUNTER_CLOCKWISE && s.hasPanel(NORTH) {
+			return
+		}
+	}
+
+	if s.isMonsterIn(DOWNRIGHT_QUAD) {
+		if r == CLOCKWISE && s.hasPanel(EAST) {
+			return
+		}
+		if r == COUNTER_CLOCKWISE && s.hasPanel(SOUTH) {
+			return
+		}
+	}
+
+	if s.isMonsterIn(DOWNLEFT_QUAD) {
+		if r == CLOCKWISE && s.hasPanel(SOUTH) {
+			return
+		}
+		if r == COUNTER_CLOCKWISE && s.hasPanel(WEST) {
+			return
+		}
+	}
+
 	s.rotation = s.rotation + int(r)
 	if s.rotation == 4 {
 		s.rotation = 0
@@ -150,4 +187,50 @@ func (s *Switch) rotate(r Rotation) {
 	if s.rotation == -1 {
 		s.rotation = 3
 	}
+}
+
+type Quad int
+
+const (
+	UPLEFT_QUAD Quad = iota
+	UPRIGHT_QUAD
+	DOWNRIGHT_QUAD
+	DOWNLEFT_QUAD
+)
+
+func (s *Switch) isMonsterIn(q Quad) bool {
+
+	for _, m := range level.monsters {
+
+		if q == UPRIGHT_QUAD {
+			if m.position.X > s.position.X && m.position.X <= s.position.X+s.width*2 &&
+				m.position.Y < s.position.Y && m.position.Y >= s.position.Y-s.width {
+				return true
+			}
+		}
+
+		if q == UPLEFT_QUAD {
+			if m.position.X < s.position.X && m.position.X >= s.position.X-s.width*2 &&
+				m.position.Y < s.position.Y && m.position.Y >= s.position.Y-s.width {
+				return true
+			}
+		}
+
+		if q == DOWNRIGHT_QUAD {
+			if m.position.X > s.position.X && m.position.X <= s.position.X+s.width*2 &&
+				m.position.Y > s.position.Y && m.position.Y <= s.position.Y+s.width {
+				return true
+			}
+		}
+
+		if q == DOWNLEFT_QUAD {
+			if m.position.X < s.position.X && m.position.X >= s.position.X-s.width*2 &&
+				m.position.Y > s.position.Y && m.position.Y <= s.position.Y+s.width {
+				return true
+			}
+		}
+
+	}
+
+	return false
 }

@@ -11,6 +11,4 @@ Simple terminal game.
 
 
 ### BUGS
-
-* Rotating a doors pass through monsters
 * Only one quick level defined.
