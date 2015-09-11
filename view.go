@@ -12,6 +12,7 @@ func render() {
 	termbox.Clear(backgroundColor, backgroundColor)
 	level.drawOutside()
 	level.drawWalls()
+	level.drawTreasure()
 	level.drawSwitches()
 	level.drawMonsters()
 	hero.Draw()

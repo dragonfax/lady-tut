@@ -1,19 +1,32 @@
 package main
 
-import "github.com/nsf/termbox-go"
+import (
+	"fmt"
+	"os"
+
+	"github.com/nsf/termbox-go"
+)
 
 type Hero struct {
-	position Position
-	health   uint
+	position  Position
+	health    uint
+	treasures uint
 }
 
-var hero = Hero{Position{0, 0}, 1}
+var hero = Hero{Position{0, 0}, 1, 0}
 
 func (h Hero) Draw() {
 	termbox.SetCell(h.position.X, h.position.Y, 'H', foregroundColor, backgroundColor)
 }
 
 func (h Hero) collides(np Position, op Position) bool {
+
+	if level.exit == np {
+		termbox.Close()
+		fmt.Printf("Win! Treasure = %d\n", h.treasures*10)
+		os.Exit(0)
+	}
+
 	if level.isWallAt(np) {
 		return true
 	}
@@ -23,6 +36,15 @@ func (h Hero) collides(np Position, op Position) bool {
 	}
 
 	return false
+}
+
+func (h *Hero) takeTreasure() {
+	for i, t := range level.treasure {
+		if t != nil && *t == h.position {
+			h.treasures++
+			level.treasure[i] = nil
+		}
+	}
 }
 
 func (h *Hero) moveLeft() {
@@ -37,6 +59,8 @@ func (h *Hero) moveLeft() {
 		return
 	}
 
+	h.takeTreasure()
+
 	h.position = np
 }
 
@@ -48,6 +72,8 @@ func (h *Hero) moveRight() {
 	if h.collides(np, h.position) {
 		return
 	}
+
+	h.takeTreasure()
 
 	h.position = np
 }
@@ -64,6 +90,8 @@ func (h *Hero) moveUp() {
 		return
 	}
 
+	h.takeTreasure()
+
 	h.position = np
 }
 
@@ -75,6 +103,8 @@ func (h *Hero) moveDown() {
 	if h.collides(np, h.position) {
 		return
 	}
+
+	h.takeTreasure()
 
 	h.position = np
 }

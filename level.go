@@ -79,6 +79,18 @@ func (l *Level) drawMonsters() {
 	}
 }
 
+func (l *Level) drawTreasure() {
+	for _, t := range l.treasure {
+		if t != nil {
+			termbox.SetCell(t.X, t.Y, 'T', foregroundColor, backgroundColor)
+		}
+	}
+}
+
+func (l *Level) drawExit() {
+	termbox.SetCell(l.exit.X, l.exit.Y, '>', foregroundColor, backgroundColor)
+}
+
 func load(filename string) *Level {
 	l := &Level{walls: make([][]bool, 0, 50)}
 
