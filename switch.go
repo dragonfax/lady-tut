@@ -86,19 +86,19 @@ func (s *Switch) isCollided(p Position) bool {
 		return true
 	}
 
-	if s.hasPanel(NORTH) && p.X == s.position.X && p.Y < s.position.Y && p.Y > s.position.Y-s.width {
+	if s.hasPanel(NORTH) && p.X == s.position.X && p.Y < s.position.Y && p.Y >= s.position.Y-s.width {
 		return true
 	}
 
-	if s.hasPanel(SOUTH) && p.X == s.position.X && p.Y > s.position.Y && p.Y < s.position.Y+s.width {
+	if s.hasPanel(SOUTH) && p.X == s.position.X && p.Y > s.position.Y && p.Y <= s.position.Y+s.width {
 		return true
 	}
 
-	if s.hasPanel(WEST) && p.Y == s.position.Y && p.X < s.position.X && p.X > s.position.X-s.width*2 {
+	if s.hasPanel(WEST) && p.Y == s.position.Y && p.X < s.position.X && p.X >= s.position.X-s.width*2 {
 		return true
 	}
 
-	if s.hasPanel(EAST) && p.Y == s.position.Y && p.X > s.position.X && p.X < s.position.X+s.width*2 {
+	if s.hasPanel(EAST) && p.Y == s.position.Y && p.X > s.position.X && p.X <= s.position.X+s.width*2 {
 		return true
 	}
 
@@ -107,7 +107,7 @@ func (s *Switch) isCollided(p Position) bool {
 
 func (s *Switch) canRotate(p Position) (bool, Rotation) {
 
-	if s.hasPanel(NORTH) && p.Y < s.position.Y && p.Y > s.position.Y-s.width {
+	if s.hasPanel(NORTH) && p.Y < s.position.Y && p.Y >= s.position.Y-s.width {
 		if p.X == s.position.X+1 {
 			return true, COUNTER_CLOCKWISE
 		} else if p.X == s.position.X-1 {
@@ -115,7 +115,7 @@ func (s *Switch) canRotate(p Position) (bool, Rotation) {
 		}
 	}
 
-	if s.hasPanel(SOUTH) && p.Y > s.position.Y && p.Y < s.position.Y+s.width {
+	if s.hasPanel(SOUTH) && p.Y > s.position.Y && p.Y <= s.position.Y+s.width {
 		if p.X == s.position.X+1 {
 			return true, CLOCKWISE
 		} else if p.X == s.position.X-1 {
@@ -123,7 +123,7 @@ func (s *Switch) canRotate(p Position) (bool, Rotation) {
 		}
 	}
 
-	if s.hasPanel(WEST) && p.X < s.position.X && p.X > s.position.X-s.width*2 {
+	if s.hasPanel(WEST) && p.X < s.position.X && p.X >= s.position.X-s.width*2 {
 		if p.Y == s.position.Y+1 {
 			return true, CLOCKWISE
 		} else if p.Y == s.position.Y-1 {
@@ -131,7 +131,7 @@ func (s *Switch) canRotate(p Position) (bool, Rotation) {
 		}
 	}
 
-	if s.hasPanel(EAST) && p.X > s.position.X && p.X < s.position.X+s.width*2 {
+	if s.hasPanel(EAST) && p.X > s.position.X && p.X <= s.position.X+s.width*2 {
 		if p.Y == s.position.Y+1 {
 			return true, COUNTER_CLOCKWISE
 		} else if p.Y == s.position.Y-1 {
@@ -143,8 +143,11 @@ func (s *Switch) canRotate(p Position) (bool, Rotation) {
 }
 
 func (s *Switch) rotate(r Rotation) {
-	s.rotation = (int(s.rotation) + 4) % MAX_PANEL
-	if s.rotation < 0 {
-		s.rotation = MAX_PANEL + s.rotation
+	s.rotation = s.rotation + int(r)
+	if s.rotation == 4 {
+		s.rotation = 0
+	}
+	if s.rotation == -1 {
+		s.rotation = 3
 	}
 }
