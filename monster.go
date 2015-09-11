@@ -2,6 +2,7 @@ package main
 
 import (
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/nsf/termbox-go"
@@ -41,6 +42,11 @@ func (m *Monster) moveLeft() {
 		np.X = 0
 	}
 
+	if hero.position == np {
+		termbox.Close()
+		os.Exit(1)
+	}
+
 	if m.collides(np) {
 		return
 	}
@@ -56,6 +62,11 @@ func (m *Monster) moveUp() {
 		np.Y = 0
 	}
 
+	if hero.position == np {
+		termbox.Close()
+		os.Exit(1)
+	}
+
 	if m.collides(np) {
 		return
 	}
@@ -68,6 +79,11 @@ func (m *Monster) moveRight() {
 
 	np.X += 1
 
+	if hero.position == np {
+		termbox.Close()
+		os.Exit(1)
+	}
+
 	if m.collides(np) {
 		return
 	}
@@ -79,6 +95,11 @@ func (m *Monster) moveDown() {
 	np := m.position
 
 	np.Y += 1
+
+	if hero.position == np {
+		termbox.Close()
+		os.Exit(1)
+	}
 
 	if m.collides(np) {
 		return
