@@ -60,9 +60,9 @@ func (l *Level) isWallAt(p Position) bool {
 
 func (l *Level) isSwitchAt(p Position, op Position, flip bool) bool {
 	for _, s := range l.switches {
-		if a, b := s.isCollided(p); a {
-			if flip && b {
-				s.Swivel(op)
+		if a := s.isCollided(p); a {
+			if can, r := s.canRotate(op); flip && can {
+				s.rotate(r)
 			}
 			return true
 		}

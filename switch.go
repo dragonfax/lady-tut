@@ -2,150 +2,149 @@ package main
 
 import "github.com/nsf/termbox-go"
 
-type Direction uint8
+type Panel int
 
-// if the default door is facing up
-// what direction will it face after its been rotated?
 const (
-	UP            Direction = iota
-	RIGHT                   = iota
-	DOWN                    = iota
-	LEFT                    = iota
-	MAX_DIRECTION           = iota
+	NORTH Panel = iota
+	EAST
+	SOUTH
+	WEST
+	MAX_PANEL int = 4
 )
 
 type Rotation int8
 
 const (
 	CLOCKWISE         Rotation = 1
-	COUNTER_CLOCKWISE          = -1
+	COUNTER_CLOCKWISE Rotation = -1
 )
 
 // a swinging door or set of doors around the same pivot
 // center
 type Switch struct {
-	grid      Grid
-	pivot     Position
-	position  Position // position within the level
-	direction Direction
+	width    int             // door length, doubled for east/west doors
+	position Position        // coord of pivot within the level
+	rotation int             // 0-3
+	panels   [MAX_PANEL]bool // starting with the north panel
 }
 
 func NewSwitch() *Switch {
 	return &Switch{
-		Grid{
-			{false, false, true},
-			{false, false, true},
-			{false, false, false, true, true},
-		},
-		Position{2, 2},
-		Position{5, 5},
-		UP,
+		width:    2,
+		position: Position{5, 5},
+		rotation: 0,
+		panels:   [4]bool{true, true, false, false},
 	}
 }
 
-// given a rotated position, return the unrotated/original position
-func (s *Switch) UnwindPosition(p Position) Position {
-	o := p.Subtract(s.pivot)
+func (s *Switch) hasPanel(p Panel) bool {
 
-	var no Position
+	rp := (int(p) - s.rotation) % int(MAX_PANEL)
 
-	switch s.direction {
-	case UP:
-		return p
-	case RIGHT:
-		no = Position{o.Y, -o.X}
-	case DOWN:
-		no = Position{-o.X, -o.Y}
-	case LEFT:
-		no = Position{-o.Y, o.X}
-	default:
-		panic("unknown case")
+	// reverse modulus
+	if rp < 0 {
+		rp = 4 + rp
 	}
 
-	return no.Add(s.pivot)
-}
-
-// given a position in the switch grid, return the rotated position.
-func (s *Switch) WindPosition(p Position) Position {
-	// 1. orient to pivot point
-	// 2. flip axis and sign
-	// 3. reorient to pivot again
-
-	o := p.Subtract(s.pivot)
-
-	var no Position
-
-	switch s.direction {
-	case UP:
-		return p
-	case RIGHT:
-		no = Position{-o.Y, o.X}
-	case DOWN:
-		no = Position{-o.X, -o.Y}
-	case LEFT:
-		no = Position{o.Y, -o.X}
-	default:
-		panic("unknown case")
-	}
-
-	return no.Add(s.pivot)
+	return s.panels[rp]
 }
 
 func (s *Switch) Draw() {
 
-	plp := s.position.Add(s.pivot)
-	termbox.SetCell(plp.X, plp.Y, 'O', foregroundColor, backgroundColor)
+	termbox.SetCell(s.position.X, s.position.Y, 'O', foregroundColor, backgroundColor)
 
-	for y := 0; y < len(s.grid); y++ {
-		for x := 0; x < len(s.grid[y]); x++ {
-			if s.grid[y][x] {
-				rp := s.WindPosition(Position{x, y})
-				var r rune
-				if rp.X > s.pivot.X {
-					r = '-'
-				} else if rp.X < s.pivot.X {
-					r = '-'
-				} else if rp.Y > s.pivot.Y {
-					r = '|'
-				} else if rp.Y < s.pivot.Y {
-					r = '|'
-				} else {
-					panic("bad door position")
-				}
-				gridp := s.position.Add(rp)
-				termbox.SetCell(gridp.X, gridp.Y, r, foregroundColor, backgroundColor)
-			}
+	if s.hasPanel(NORTH) {
+		for i := int(1); i <= s.width; i++ {
+			termbox.SetCell(s.position.X, s.position.Y-i, '|', foregroundColor, backgroundColor)
 		}
 	}
+
+	if s.hasPanel(EAST) {
+		for i := 1; i <= s.width*2; i++ {
+			termbox.SetCell(s.position.X+i, s.position.Y, '-', foregroundColor, backgroundColor)
+		}
+	}
+
+	if s.hasPanel(SOUTH) {
+		for i := 1; i <= s.width; i++ {
+			termbox.SetCell(s.position.X, s.position.Y+i, '|', foregroundColor, backgroundColor)
+		}
+	}
+
+	if s.hasPanel(WEST) {
+		for i := 1; i <= s.width*2; i++ {
+			termbox.SetCell(s.position.X-i, s.position.Y, '-', foregroundColor, backgroundColor)
+		}
+	}
+
 }
 
-func (s *Switch) isCollided(p0 Position) (bool, bool) {
-	p1 := p0.Subtract(s.position)
-	p := s.UnwindPosition(p1)
-	if p.X < 0 || p.Y < 0 {
-		return false, false
+func (s *Switch) isCollided(p Position) bool {
+
+	if p.X == s.position.X && p.Y == s.position.Y {
+		// collides with center
+		return true
 	}
-	if p == s.pivot {
-		return true, false
+
+	if s.hasPanel(NORTH) && p.X == s.position.X && p.Y < s.position.Y && p.Y > s.position.Y-s.width {
+		return true
 	}
-	if len(s.grid) > p.Y && len(s.grid[p.Y]) > p.X && s.grid[p.Y][p.X] {
-		return true, true
+
+	if s.hasPanel(SOUTH) && p.X == s.position.X && p.Y > s.position.Y && p.Y < s.position.Y+s.width {
+		return true
 	}
-	return false, false
+
+	if s.hasPanel(WEST) && p.Y == s.position.Y && p.X < s.position.X && p.X > s.position.X-s.width*2 {
+		return true
+	}
+
+	if s.hasPanel(EAST) && p.Y == s.position.Y && p.X > s.position.X && p.X < s.position.X+s.width*2 {
+		return true
+	}
+
+	return false
 }
 
-func (s *Switch) Swivel(op Position) {
-	// TODO
-	s.Rotate(CLOCKWISE)
+func (s *Switch) canRotate(p Position) (bool, Rotation) {
+
+	if s.hasPanel(NORTH) && p.Y < s.position.Y && p.Y > s.position.Y-s.width {
+		if p.X == s.position.X+1 {
+			return true, COUNTER_CLOCKWISE
+		} else if p.X == s.position.X-1 {
+			return true, CLOCKWISE
+		}
+	}
+
+	if s.hasPanel(SOUTH) && p.Y > s.position.Y && p.Y < s.position.Y+s.width {
+		if p.X == s.position.X+1 {
+			return true, CLOCKWISE
+		} else if p.X == s.position.X-1 {
+			return true, COUNTER_CLOCKWISE
+		}
+	}
+
+	if s.hasPanel(WEST) && p.X < s.position.X && p.X > s.position.X-s.width*2 {
+		if p.Y == s.position.Y+1 {
+			return true, CLOCKWISE
+		} else if p.Y == s.position.Y-1 {
+			return true, COUNTER_CLOCKWISE
+		}
+	}
+
+	if s.hasPanel(EAST) && p.X > s.position.X && p.X < s.position.X+s.width*2 {
+		if p.Y == s.position.Y+1 {
+			return true, COUNTER_CLOCKWISE
+		} else if p.Y == s.position.Y-1 {
+			return true, CLOCKWISE
+		}
+	}
+
+	return false, CLOCKWISE
 }
 
-func (s *Switch) Rotate(c Rotation) {
-	nd := uint8(s.direction) + uint8(c)
-	if nd >= MAX_DIRECTION {
-		nd = 0
+func (s *Switch) rotate(r Rotation) {
+	s.rotation = (int(s.rotation) + 4) % MAX_PANEL
+	if s.rotation < 0 {
+		s.rotation = MAX_PANEL + s.rotation
 	}
-	if nd < 0 {
-		nd = MAX_DIRECTION - 1
-	}
-	s.direction = Direction(nd)
 }
